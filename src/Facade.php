@@ -5,7 +5,7 @@ namespace Zaengle\SentryReleaseNotifier;
 /**
  * Class EnvoyerSentryReleaseNotifier.
  */
-class Facade extends Illuminate\Support\Facades\Facade
+class Facade extends \Illuminate\Support\Facades\Facade
 {
     /**
      * @method static getCommitHash(): string
