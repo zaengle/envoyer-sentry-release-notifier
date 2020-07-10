@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaengle\SentryReleaseNotifier;
+namespace Zaengle\EnvoyerSentryReleaseNotifier;
 
 /**
  * Class SentryReleaseNotifier.

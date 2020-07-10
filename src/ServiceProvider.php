@@ -1,6 +1,6 @@
 <?php
 
-namespace Zaengle\SentryReleaseNotifier;
+namespace Zaengle\EnvoyerSentryReleaseNotifier;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
