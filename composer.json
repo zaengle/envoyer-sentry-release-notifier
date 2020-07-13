@@ -33,10 +33,7 @@
     "laravel": {
       "providers": [
         "Zaengle\\EnvoyerSentryReleaseNotifier\\ServiceProvider"
-      ],
-      "aliases": {
-        "EnvoyerSentryReleaseNotifier": "Zaengle\\EnvoyerSentryReleaseNotifier\\Facade"
-      }
+      ]
     }
   },
   "minimum-stability": "dev",

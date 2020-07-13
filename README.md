@@ -1,7 +1,15 @@
 # Envoyer Sentry Release Notifier
-This tool helps with the process of collecting commits and sending them to Sentry as a new release.
+This tool helps with the process of collecting commits and sending them to Sentry as a new release while deploying from [Laravel Envoyer](https://envoyer.io/).
+
+Sentry can associate a series of git commits to a release by providing a starting hash and ending hash. With Envoyer it can be a bit tricky since the `.git` repository isn't deployed with the site. By using the following combination of deployment hooks we are able to capture the two required hashes and gain the benefits of commit tracking in Sentry.
+
+## Installation
+
+`composer require zaengle/envoyer-sentry-release-notifier`
 
 ## Sentry Config
+
+Inside your `config/sentry.php` file add the `getCommitHash()` helper provided by this package.
 
 ```php
 <?php
@@ -10,29 +18,35 @@ use Zaengle\EnvoyerSentryReleaseNotifier\EnvoyerSentryReleaseNotifier;
 
 return [
     // capture release as git sha
-    'release' => (new EnvoyerSentryReleaseNotifier())->getCommitHash(),
+    'release' => app(EnvoyerSentryReleaseNotifier::class)->getCommitHash(),
     
     // rest of config...
 ];
 ```
 
 ## Envoyer Hooks
+Once your project is set up with Sentry, add the following deployment hooks to Envoyer. **You will need to run one deployment with _only the `Write Git Hash` hook enabled_ so that your initial `.commit_hash` file will be present for future releases.**
 
-These commands should be added as Deployment Hooks in the Envoyer control panel:
+## Activate New Release : AFTER
+![image](./write-git-hash.png)
+
+After Envoyer activates a new release we need to write the hash to a file so it's available for the next release, where it will be used as the `commit_hash_previous`"
+
+```shell script
+echo "{{ sha }}" > {{release}}/.commit_hash
+```
+**NOTE** - This command will need to be run one time before activating any of the other hooks so the initial `.commit_hash` file is created for subsequent steps.
 
 ## Clone New Release : AFTER
+![image](./write-previous-sha.png)
+
 ```shell script
 yes | cp -f {{project}}/current/.commit_hash {{release}}/.commit_hash_previous
 echo "{{ sha }}" > {{release}}/.commit_hash
 ```
 
-## Activate New Release : AFTER
-```shell script
-echo "{{ sha }}" > {{release}}/.commit_hash
-```
-**NOTE** - This command may need to be run one time before activating any of the other hooks so the initial `.commit_hash` file is created for subsequent steps.
-
 ## Purge Old Releases : AFTER
+![image](./notify-sentry.png)
 
 ```shell script
 export SENTRY_BEARER_TOKEN="MyBearerToken"

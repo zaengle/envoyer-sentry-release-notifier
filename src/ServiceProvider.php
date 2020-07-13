@@ -35,6 +35,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function provides()
     {
-        return ['envoyer-sentry-release-notifier'];
+        return [];
     }
 }
