@@ -49,13 +49,15 @@ echo "{{ sha }}" > {{release}}/.commit_hash
 ![image](./notify-sentry.png)
 
 ```shell script
-export SENTRY_BEARER_TOKEN="MyBearerToken"
-export SENTRY_PROJECT="my-sentry-project-name"
+export GIT_REPO="zaengle/my-sentry-project-name"
 export ENVIRONMENT="develop"
 export PREVIOUS_SHA=`tail {{release}}/.commit_hash_previous`
+export SENTRY_ORG="zaengle"
+export SENTRY_BEARER_TOKEN="MyBearerToken"
+export SENTRY_PROJECT="my-sentry-project-name"
 
 cd {{ release }}
-curl https://sentry.io/api/0/organizations/zaengle/releases/ \
+curl https://sentry.io/api/0/organizations/${SENTRY_ORG}/releases/ \
 -H "Authorization: Bearer ${SENTRY_BEARER_TOKEN}" \
 -X POST \
 -H "Content-Type:application/json" \
@@ -63,14 +65,14 @@ curl https://sentry.io/api/0/organizations/zaengle/releases/ \
     \"environment\":\"${ENVIRONMENT}\",
     \"version\":\"{{sha}}\",
     \"refs\":[{
-        \"repository\":\"zaengle/my-repository-name\",
+        \"repository\":\"${GIT_REPO}\",
         \"commit\":\"{{sha}}\",
         \"previousCommit\": \"${PREVIOUS_SHA}\"
     }],
-    \"projects\": [\"my-sentry-project-name\"]
+    \"projects\": [\"${SENTRY_PROJECT}\"]
 }"
 
-curl https://sentry.io/api/0/organizations/zaengle/releases/{{sha}}/deploys/ \
+curl https://sentry.io/api/0/organizations/${SENTRY_ORG}/releases/{{sha}}/deploys/ \
 -X POST \
 -H "Authorization: Bearer ${SENTRY_BEARER_TOKEN}" \
 -H 'Content-Type: application/json' \
@@ -78,6 +80,23 @@ curl https://sentry.io/api/0/organizations/zaengle/releases/{{sha}}/deploys/ \
 {
     \"environment\": \"${ENVIRONMENT}\",
     \"name\": \"{{release}}\"
+}"
+```
+
+_Note_: Sentry deploy names are limited to 64 characters. Depending on the length of your projects domain name and release path you might receive the following error.
+
+```
+{"name":["Ensure this field has no more than 64 characters."]}
+```
+
+If so, update the deployment script to send the `{{time}}` instead of the `{{release}}`.
+
+```diff
+...
+{
+    \"environment\": \"${ENVIRONMENT}\",
+-    \"name\": \"{{release}}\"
++    \"name\": \"{{time}}\"
 }"
 ```
 
